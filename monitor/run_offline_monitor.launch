@@ -1,0 +1,7 @@
+
+<launch>
+        
+<node pkg="monitor" type="offline_monitor_FUAV.py" name="offline_monitor_FUAV" output="screen"/>
+         
+</launch>
+        
