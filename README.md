@@ -1,5 +1,6 @@
 # ROS Monitor for an FUAV
 This repository consists of offline and online monitors for the FUAV [here](https://github.com/iagosilvestre/tello_ros.git).
+After downloading the main repository, take the following steps to integrate the monitors:
 
 1. Download the monitor folder and place it in ```~/<your_colcon_ws>/src```. 
 2. Make the monitor codes executable:
