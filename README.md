@@ -1,5 +1,8 @@
 # ROS Monitor for an FUAV
 This repository consists of offline and online monitors for the FUAV [here](https://github.com/iagosilvestre/tello_ros.git).
+
+At this stage the aim is to observe and log the messages of particular topics. No properties have yet been provided for the oracles to check. Therefore, as a first step, the monitors only track messages published on topic ```detectRed``` of type ```std_msgs.msg.Int16``` by node ```example_node``` in package ```my_ros_package```. 
+
 After downloading the main repository, take the following steps to integrate the monitors:
 
 1. Download the monitor folder and place it in ```~/<your_colcon_ws>/src```. 
