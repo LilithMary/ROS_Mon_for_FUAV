@@ -43,7 +43,7 @@ def logging(json_dict):
 
 def main(argv):
 	global log, actions, ws
-	log = './log_FUAV.txt' 
+	log = './offline_FUAV_log.txt' 
 	actions = {
 		'detectRed' : ('log', 1)
 	}
