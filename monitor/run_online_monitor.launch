@@ -1,7 +1,0 @@
-
-<launch>
-        
-<node pkg="monitor" type="online_monitor_FUAV.py" name="online_monitor_FUAV" output="screen"/>
-         
-</launch>
-        
