@@ -1,117 +1,128 @@
 #!/usr/bin/env python
-import rospy
-import sys
+
+# begin imports
 import json
 import yaml
 import websocket
+import sys
+import rclpy
+import rosidl_runtime_py
+from rclpy.node import Node
 from threading import *
-from rospy_message_converter import message_converter
-from monitor.msg import *
-from std_msgs.msg import *
+from rosmonitoring_interfaces.msg import MonitorError
+from std_msgs.msg import String
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+# done import
 
-ws_lock = Lock()
-dict_msgs = {}
-
-pubdetectRed = rospy.Publisher(name = 'detectRed', data_class = Int16, latch = True, queue_size = 1000)
-def callbackdetectRed(data):
-	global ws, ws_lock
-	rospy.loginfo('monitor has observed: ' + str(data))
-	dict = message_converter.convert_ros_message_to_dictionary(data)
-	dict['topic'] = 'detectRed'
-	dict['time'] = rospy.get_time()
-	ws_lock.acquire()
-	while dict['time'] in dict_msgs:
-		dict['time'] += 0.01
-	ws.send(json.dumps(dict))
-	dict_msgs[dict['time']] = data
-	ws_lock.release()
-	rospy.loginfo('event propagated to oracle')
-pub_dict = { 'detectRed' : pubdetectRed}
-msg_dict = { 'detectRed' : "std_msgs/Int16"}
+class ROSMonitor_online_monitor_FUAV(Node):
 
 
-def monitor():
-	global pub_error, pub_verdict
-	with open(log, 'w') as log_file:
-		log_file.write('')
-	rospy.init_node('monitor_FUAV', anonymous=True)
-	pub_error = rospy.Publisher(name = 'monitor_FUAV/monitor_error', data_class = MonitorError, latch = True, queue_size = 1000)
-	pub_verdict = rospy.Publisher(name = 'monitor_FUAV/monitor_verdict', data_class = String, latch = True, queue_size = 1000)
-	rospy.Subscriber('detectRed_mon', Int16, callbackdetectRed)
-	rospy.loginfo('monitor started and ready')
-	
-def on_message(ws, message):
-	global error, log, actions
-	json_dict = json.loads(message)
-	if json_dict['verdict'] == 'true' or json_dict['verdict'] == 'currently_true' or json_dict['verdict'] == 'unknown':
-		if json_dict['verdict'] == 'true' and not pub_dict:
-			rospy.loginfo('The monitor concluded the satisfaction of the property under analysis, and can be safely removed.')
-			ws.close()
-			exit(0)
+	def callbackdetectRed(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='detectRed'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		while dict['time'] in self.dict_msgs:
+			dict['time']+=0.01
+		self.ws.send(json.dumps(dict))
+		self.dict_msgs[dict['time']] = data
+		message=self.ws.recv()
+		self.ws_lock.release()
+		self.get_logger().info("event propagated to oracle")
+		self.on_message_topic(message)
+
+	def __init__(self,monitor_name,log,actions):
+		self.monitor_publishers={}
+		self.config_publishers={}
+		self.config_subscribers={}
+		self.config_client_services={}
+		self.config_server_services={}
+		self.services_info={}
+		self.dict_msgs={}
+		self.ws_lock=Lock()
+		self.name=monitor_name
+		self.actions=actions
+		self.logfn=log
+		self.topics_info={}
+		super().__init__(self.name)
+		# creating the verdict and error publishers for the monitor
+		self.monitor_publishers['error']=self.create_publisher(topic=self.name+'/monitor_error',msg_type=MonitorError,qos_profile=1000)
+
+		self.monitor_publishers['verdict']=self.create_publisher(topic=self.name+'/monitor_verdict',msg_type=String,qos_profile=1000)
+
+		# done creating monitor publishers
+
+		self.config_publishers['detectRed']=self.create_publisher(topic='detectRed',msg_type=Int16,qos_profile=1000)
+
+		self.publish_topics=True
+		self.topics_info['detectRed']={'package': 'std_msgs.msg', 'type': 'Int16'}
+		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed_mon',msg_type=Int16,callback=self.callbackdetectRed,qos_profile=1000)
+
+		self.get_logger().info('Monitor' + self.name + ' started and ready' )
+		self.get_logger().info('Logging at' + self.logfn )
+		websocket.enableTrace(True)
+		self.ws = websocket.WebSocket()
+		self.ws.connect('ws://127.0.0.1:8080')
+		self.get_logger().info('Websocket is open')
+
+
+	def on_message_topic(self,message):
+		json_dict = json.loads(message)
+		verdict = str(json_dict['verdict'])
+		if verdict == 'true' or verdict == 'currently_true' or verdict == 'unknown':
+			if verdict == 'true' and not self.publish_topics:
+				self.get_logger().info('The monitor concluded the satisfaction of the property under analysis and can be safely removed.')
+				self.ws.close()
+				exit(0)
+			else:
+				self.logging(json_dict)
+				topic = json_dict['topic']
+				self.get_logger().info('The event '+message+' is consistent and republished')
+				if topic in self.config_publishers:
+					self.config_publishers[topic].publish(self.dict_msgs[json_dict['time']])
+				del self.dict_msgs[json_dict['time']]
 		else:
-			logging(json_dict)
-			topic = json_dict['topic']
-			rospy.loginfo('The event ' + message + ' is consistent and republished')
-			if topic in pub_dict:
-				pub_dict[topic].publish(dict_msgs[json_dict['time']])
-			del dict_msgs[json_dict['time']]
-	else:
-		logging(json_dict)
-		#if (json_dict['verdict'] == 'false' and actions[json_dict['topic']][1] >= 1) or (json_dict['verdict'] == 'currently_false' and actions[json_dict['topic']][1] == 1):
-		rospy.loginfo('The event ' + message + ' is inconsistent..')
-		error = MonitorError()
-		error.topic = json_dict['topic']
-		error.time = json_dict['time']
-		error.property = json_dict['spec']
-		error.content = str(dict_msgs[json_dict['time']])
-		pub_error.publish(error)
-		if json_dict['verdict'] == 'false' and not pub_dict:
-			rospy.loginfo('The monitor concluded the violation of the property under analysis, and can be safely removed.')
-			ws.close()
-			exit(0)
-		if actions[json_dict['topic']][0] != 'filter':
-			#if json_dict['verdict'] == 'currently_false':
-			#rospy.loginfo('The event ' + message + ' is consistent ')
-			topic = json_dict['topic']
-			if topic in pub_dict:
-				pub_dict[topic].publish(dict_msgs[json_dict['time']])
-			del dict_msgs[json_dict['time']]
-		error = True
-	pub_verdict.publish(json_dict['verdict'])
+			self.logging(json_dict)
+			self.get_logger().info('The event' + message + ' is inconsistent' )
+			error = MonitorError()
+			error.m_topic = json_dict['topic']
+			error.m_time = json_dict['time']
+			error.m_property = json_dict['spec']
+			error.m_content = str(self.dict_msgs[json_dict['time']])
+			self.monitor_publishers['error'].publish(error)
+			if verdict == 'false' and not self.publish_topics:
+				self.get_logger().info('The monitor concluded the violation of the property under analysis and can be safely removed.')
+				self.ws.close()
+				exit(0)
+			if self.actions[json_dict['topic']][0] != 'filter':
+				topic = json_dict['topic']
+				if topic in self.config_publishers:
+					self.config_publishers[topic].publish(self.dict_msgs[json_dict['time']])
+				del self.dict_msgs[json_dict['time']]
+			error=True
+		verdict_msg = String()
+		verdict_msg.data = verdict
+		self.monitor_publishers['verdict'].publish(verdict_msg)
 
-def on_error(ws, error):
-	rospy.loginfo(error)
+	def logging(self,json_dict):
+		try:
+			with open(self.logfn,'a+') as log_file:
+				log_file.write(json.dumps(json_dict)+'\n')
+			self.get_logger().info('Event logged')
+		except:
+			self.get_logger().info('Unable to log the event')
 
-def on_close(ws):
-	rospy.loginfo('### websocket closed ###')
-
-def on_open(ws):
-	rospy.loginfo('### websocket is open ###')
-
-def logging(json_dict):
-	try:
-		with open(log, 'a+') as log_file:
-			log_file.write(json.dumps(json_dict) + '\n')
-		rospy.loginfo('event logged')
-	except:
-		rospy.loginfo('Unable to log the event.')
-
-def main(argv):
-	global log, actions, ws
-	log = './online_FUAV_log.txt' 
-	actions = {
-		'detectRed' : ('log', 0)
-	}
-	monitor()
-	websocket.enableTrace(False)
-	ws = websocket.WebSocketApp(
-		'ws://127.0.0.1:8080',
-		on_message = on_message,
-            
-		on_error = on_error,
-		on_close = on_close,
-		on_open = on_open)
-	ws.run_forever()
+def main(args=None):
+	rclpy.init(args=args)
+	log = './online_log_FUAV.txt'
+	actions = {}
+	actions['detectRed']=('log',0)
+	monitor = ROSMonitor_online_monitor_FUAV('online_monitor_FUAV',log,actions)
+	rclpy.spin(monitor)
+	monitor.ws.close()
+	monitor.destroy_node()
+	rclpy.shutdown()
 
 if __name__ == '__main__':
-	main(sys.argv)
+	main()
