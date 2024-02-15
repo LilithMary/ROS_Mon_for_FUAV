@@ -23,7 +23,7 @@ source /opt/ros/foxy/setup.bash
 source /install/local_setup.bash
 source /install/setup.bash
 
-ros2 launch monitor run_offline_monitor.launch
+ros2 launch monitor monitor_launch.py
 ```
 
 ### Run gazebo simulation
