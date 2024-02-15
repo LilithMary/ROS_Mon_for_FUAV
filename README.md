@@ -20,6 +20,8 @@ Here we run the ROS nodes first and let the offline monitor log the events. Once
 ```
 cd ~/<your_colcon_ws>
 source /opt/ros/foxy/setup.bash
+source /install/local_setup.bash
+source /install/setup.bash
 
 ros2 launch monitor run_offline_monitor.launch
 ```
