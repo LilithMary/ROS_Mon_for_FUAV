@@ -2,7 +2,6 @@ from setuptools import setup
 import setup_resources as sr
 
 
-
 package_name = 'monitor'
 
 
@@ -15,6 +14,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/launch', ['monitor_launch.py'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,

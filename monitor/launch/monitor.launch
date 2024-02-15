@@ -1,0 +1,1 @@
+<launch><node pkg="monitor" exec="offline_monitor_FUAV" name="offline_monitor_FUAV" output="screen" /></launch>
