@@ -23,7 +23,7 @@ source /opt/ros/foxy/setup.bash
 source /install/local_setup.bash
 source /install/setup.bash
 
-ros2 launch monitor monitor_launch.py
+ros2 launch monitor offline_monitor_launch.py
 ```
 
 ### Run gazebo simulation
@@ -38,4 +38,19 @@ All events observed by the ROS monitor should be in ```~/<your_colcon_ws>/offlin
 ## Online Monitoring:
 Here we run the online oracle before running the ROS nodes so that the verdicts are published as the nodes are active.
 
-[To Do]
+### Run Oracle
+```
+cd <your_ROSMonitoring_path>/oracle/TLOracle/
+python3 oracle.py --discrete --online --property dummy
+```
+
+### Run ROS monitoring node
+```
+cd ~/<your_colcon_ws>
+source /opt/ros/foxy/setup.bash
+source /install/local_setup.bash
+source /install/setup.bash
+
+ros2 launch monitor online_monitor_launch.py
+```
+
