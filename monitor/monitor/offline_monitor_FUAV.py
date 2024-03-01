@@ -12,7 +12,6 @@ from threading import *
 from rosmonitoring_interfaces.msg import MonitorError
 from std_msgs.msg import *
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-from numpy import int16
 # done import
 
 class ROSMonitor_offline_monitor_FUAV(Node):
@@ -51,7 +50,7 @@ class ROSMonitor_offline_monitor_FUAV(Node):
 
 		self.publish_topics=False
 		self.topics_info['detectRed']={'package': 'std_msgs.msg', 'type': int16}
-		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed',msg_type=Int16,callback=self.callbackdetectRed,qos_profile=1000)
+		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed',msg_type=int16,callback=self.callbackdetectRed,qos_profile=1000)
 
 		self.get_logger().info('Monitor' + self.name + ' started and ready' )
 		self.get_logger().info('Logging at' + self.logfn )
