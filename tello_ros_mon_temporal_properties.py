@@ -14,9 +14,9 @@ import oracle
 
 pl = [
 '(once[100:101]({topic: "detectRed", detectRed: True}) -> {topic: "agentReact", reactRed: True} )',
-'({topic: "batteryInfo", battery: "Safety"} -> {topic: "agLand", landingMode: "Safety"})',
-'({topic: "batteryInfo", battery: "Critical"} -> {topic: "agLand", landingMode: "Critical"})',
-'({topic: "cmd_tello", forwardMotion: True})'
+'({topic: "battery", battery: "Safety"} -> {topic: "agLand", landingMode: "Safety"})',
+'({topic: "battery", battery: "Critical"} -> {topic: "agLand", landingMode: "Critical"})',
+'({topic: "cmd_vel", forwardMotion: True})'
 ]
 
 # property to verify
@@ -39,7 +39,7 @@ def abstract_message(message):
     	predicates['detectRed'] = (detectRed > 200)
  
     elif message['topic'] == "agentReact":
-    	reaction = str(message['reaction'])
+    	reaction = str(message['agentReact'])
     	predicates['reactRed'] = (reaction == 'reactRed')
     	
     elif message['topic'] == "battery":
@@ -52,7 +52,7 @@ def abstract_message(message):
     		predicates['battery'] = 'Unspecified'
     		
     elif message['topic'] == "agLand":
-    	landingMode = message['landingMode']
+    	landingMode = str(message['agLand'])
     	if landingMode == 'safetyLanding':
     		predicates['landingMode'] = 'Safety'
     	elif landingMode == 'criticalLanding':
@@ -60,8 +60,8 @@ def abstract_message(message):
     	else:
     		predicates['landingMode'] = 'Unspecified'
 
-    elif message['topic'] == 'cmd_tello':
-    	linearY = float(message['cmd_vel']['linear']['y'])
+    elif message['topic'] == 'cmd_vel':
+    	linearY = float(message['linear']['y'])
     	predicates['forwardMotion'] = (linearY >= 0)
     	
     #print(predicates)
