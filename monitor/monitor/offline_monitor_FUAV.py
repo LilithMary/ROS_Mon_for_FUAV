@@ -10,7 +10,7 @@ import rosidl_runtime_py
 from rclpy.node import Node
 from threading import *
 from rosmonitoring_interfaces.msg import MonitorError
-from std_msgs.msg import String
+from std_msgs.msg import *
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 # done import
 
