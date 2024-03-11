@@ -7,7 +7,7 @@ import oracle
 # replace "landingMode" with field name that carries 'safetyLanding' and 'criticalLanding'
 
 pl = [
-'(once[100:100]({topic: "visual_sensor", detectRed: True}) -> {topic: "agentReact", reactRed: True} )',
+'(once[100:101]({topic: "visual_sensor", detectRed: True}) -> {topic: "agentReact", reactRed: True} )',
 '({topic: "batteryInfo", battery: "Safety"} -> {topic: "agLand", landingMode: "Safety"})',
 '({topic: "batteryInfo", battery: "Critical"} -> {topic: "agLand", landingMode: "Critical"})',
 '({topic: "drone1/cmd_vel", forwardMotion: True})'
