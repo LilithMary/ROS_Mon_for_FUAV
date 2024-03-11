@@ -10,7 +10,7 @@ import rosidl_runtime_py
 from rclpy.node import Node
 from threading import *
 from rosmonitoring_interfaces.msg import MonitorError
-from std_msgs.msg import *
+from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 # done import
 
@@ -21,6 +21,46 @@ class ROSMonitor_offline_monitor_FUAV(Node):
 		self.get_logger().info("monitor has observed "+ str(data))
 		dict= rosidl_runtime_py.message_to_ordereddict(data)
 		dict['topic']='detectRed'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		self.logging(dict)
+		self.ws_lock.release()
+		self.get_logger().info("event successfully logged")
+
+	def callbackagentReact(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='agentReact'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		self.logging(dict)
+		self.ws_lock.release()
+		self.get_logger().info("event successfully logged")
+
+	def callbackbattery(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='battery'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		self.logging(dict)
+		self.ws_lock.release()
+		self.get_logger().info("event successfully logged")
+
+	def callbackagLand(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='agLand'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		self.logging(dict)
+		self.ws_lock.release()
+		self.get_logger().info("event successfully logged")
+
+	def callbackcmd_tello(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='cmd_tello'
 		dict['time']=float(self.get_clock().now().to_msg().sec)
 		self.ws_lock.acquire()
 		self.logging(dict)
@@ -49,8 +89,20 @@ class ROSMonitor_offline_monitor_FUAV(Node):
 		# done creating monitor publishers
 
 		self.publish_topics=False
-		self.topics_info['detectRed']={'package': 'std_msgs.msg', 'type': int16}
-		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed',msg_type=int16,callback=self.callbackdetectRed,qos_profile=1000)
+		self.topics_info['detectRed']={'package': 'std_msgs.msg', 'type': 'Int16'}
+		self.topics_info['agentReact']={'package': 'std_msgs.msg', 'type': 'String'}
+		self.topics_info['battery']={'package': 'std_msgs.msg', 'type': 'Int16'}
+		self.topics_info['agLand']={'package': 'std_msgs.msg', 'type': 'String'}
+		self.topics_info['cmd_tello']={'package': 'std_msgs.msg', 'type': 'String'}
+		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed',msg_type=Int16,callback=self.callbackdetectRed,qos_profile=1000)
+
+		self.config_subscribers['agentReact']=self.create_subscription(topic='agentReact',msg_type=String,callback=self.callbackagentReact,qos_profile=1000)
+
+		self.config_subscribers['battery']=self.create_subscription(topic='battery',msg_type=Int16,callback=self.callbackbattery,qos_profile=1000)
+
+		self.config_subscribers['agLand']=self.create_subscription(topic='agLand',msg_type=String,callback=self.callbackagLand,qos_profile=1000)
+
+		self.config_subscribers['cmd_tello']=self.create_subscription(topic='cmd_tello',msg_type=String,callback=self.callbackcmd_tello,qos_profile=1000)
 
 		self.get_logger().info('Monitor' + self.name + ' started and ready' )
 		self.get_logger().info('Logging at' + self.logfn )
@@ -70,6 +122,10 @@ def main(args=None):
 	log = './log_FUAV.txt'
 	actions = {}
 	actions['detectRed']=('log',0)
+	actions['agentReact']=('log',0)
+	actions['battery']=('log',0)
+	actions['agLand']=('log',0)
+	actions['cmd_tello']=('log',0)
 	monitor = ROSMonitor_offline_monitor_FUAV('offline_monitor_FUAV',log,actions)
 	rclpy.spin(monitor)
 	monitor.ws.close()

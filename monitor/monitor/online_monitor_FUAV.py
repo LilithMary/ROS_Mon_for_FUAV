@@ -10,7 +10,7 @@ import rosidl_runtime_py
 from rclpy.node import Node
 from threading import *
 from rosmonitoring_interfaces.msg import MonitorError
-from std_msgs.msg import *
+from std_msgs.msg import String
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 # done import
 
@@ -21,6 +21,66 @@ class ROSMonitor_online_monitor_FUAV(Node):
 		self.get_logger().info("monitor has observed "+ str(data))
 		dict= rosidl_runtime_py.message_to_ordereddict(data)
 		dict['topic']='detectRed'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		while dict['time'] in self.dict_msgs:
+			dict['time']+=0.01
+		self.ws.send(json.dumps(dict))
+		self.dict_msgs[dict['time']] = data
+		message=self.ws.recv()
+		self.ws_lock.release()
+		self.get_logger().info("event propagated to oracle")
+		self.on_message_topic(message)
+
+	def callbackagentReact(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='agentReact'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		while dict['time'] in self.dict_msgs:
+			dict['time']+=0.01
+		self.ws.send(json.dumps(dict))
+		self.dict_msgs[dict['time']] = data
+		message=self.ws.recv()
+		self.ws_lock.release()
+		self.get_logger().info("event propagated to oracle")
+		self.on_message_topic(message)
+
+	def callbackbattery(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='battery'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		while dict['time'] in self.dict_msgs:
+			dict['time']+=0.01
+		self.ws.send(json.dumps(dict))
+		self.dict_msgs[dict['time']] = data
+		message=self.ws.recv()
+		self.ws_lock.release()
+		self.get_logger().info("event propagated to oracle")
+		self.on_message_topic(message)
+
+	def callbackagLand(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='agLand'
+		dict['time']=float(self.get_clock().now().to_msg().sec)
+		self.ws_lock.acquire()
+		while dict['time'] in self.dict_msgs:
+			dict['time']+=0.01
+		self.ws.send(json.dumps(dict))
+		self.dict_msgs[dict['time']] = data
+		message=self.ws.recv()
+		self.ws_lock.release()
+		self.get_logger().info("event propagated to oracle")
+		self.on_message_topic(message)
+
+	def callbackcmd_tello(self,data):
+		self.get_logger().info("monitor has observed "+ str(data))
+		dict= rosidl_runtime_py.message_to_ordereddict(data)
+		dict['topic']='cmd_tello'
 		dict['time']=float(self.get_clock().now().to_msg().sec)
 		self.ws_lock.acquire()
 		while dict['time'] in self.dict_msgs:
@@ -47,20 +107,31 @@ class ROSMonitor_online_monitor_FUAV(Node):
 		self.topics_info={}
 		super().__init__(self.name)
 		# creating the verdict and error publishers for the monitor
-		self.monitor_publishers['error']=self.create_publisher(msg_type=MonitorError,topic=self.name+'/monitor_error',qos_profile=1000)
+		self.monitor_publishers['error']=self.create_publisher(topic=self.name+'/monitor_error',msg_type=MonitorError,qos_profile=1000)
 
-		self.monitor_publishers['verdict']=self.create_publisher(msg_type=String,topic=self.name+'/monitor_verdict',qos_profile=1000)
+		self.monitor_publishers['verdict']=self.create_publisher(topic=self.name+'/monitor_verdict',msg_type=String,qos_profile=1000)
 
 		# done creating monitor publishers
 
 		self.publish_topics=False
-		self.topics_info['detectRed']={'package': 'std_msgs.msg', 'type': Int16}
-		#### error
-		self.config_subscribers['detectRed']=self.create_subscription(msg_type= Int16,topic='detectRed',callback=self.callbackdetectRed,qos_profile=1000)
+		self.topics_info['detectRed']={'package': 'std_msgs.msg', 'type': 'Int16'}
+		self.topics_info['agentReact']={'package': 'std_msgs.msg', 'type': 'String'}
+		self.topics_info['battery']={'package': 'std_msgs.msg', 'type': 'Int16'}
+		self.topics_info['agLand']={'package': 'std_msgs.msg', 'type': 'String'}
+		self.topics_info['cmd_tello']={'package': 'std_msgs.msg', 'type': 'String'}
+		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed',msg_type=Int16,callback=self.callbackdetectRed,qos_profile=1000)
+
+		self.config_subscribers['agentReact']=self.create_subscription(topic='agentReact',msg_type=String,callback=self.callbackagentReact,qos_profile=1000)
+
+		self.config_subscribers['battery']=self.create_subscription(topic='battery',msg_type=Int16,callback=self.callbackbattery,qos_profile=1000)
+
+		self.config_subscribers['agLand']=self.create_subscription(topic='agLand',msg_type=String,callback=self.callbackagLand,qos_profile=1000)
+
+		self.config_subscribers['cmd_tello']=self.create_subscription(topic='cmd_tello',msg_type=String,callback=self.callbackcmd_tello,qos_profile=1000)
 
 		self.get_logger().info('Monitor' + self.name + ' started and ready' )
 		self.get_logger().info('Logging at' + self.logfn )
-		#websocket.enableTrace(True)
+		websocket.enableTrace(True)
 		self.ws = websocket.WebSocket()
 		self.ws.connect('ws://127.0.0.1:8080')
 		self.get_logger().info('Websocket is open')
@@ -117,6 +188,10 @@ def main(args=None):
 	log = './log_FUAV_online.txt'
 	actions = {}
 	actions['detectRed']=('log',0)
+	actions['agentReact']=('log',0)
+	actions['battery']=('log',0)
+	actions['agLand']=('log',0)
+	actions['cmd_tello']=('log',0)
 	monitor = ROSMonitor_online_monitor_FUAV('online_monitor_FUAV',log,actions)
 	rclpy.spin(monitor)
 	monitor.ws.close()

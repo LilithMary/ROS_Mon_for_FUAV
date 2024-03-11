@@ -1,16 +1,22 @@
 import oracle
 
-# replace "visual_sensor" with topic for detectRed
 # replace "reaction" with field name that carries 'reactRed'
-# replace "batteryInfo" with topic for battery
 # replace "percentage" with field name that carries 'battery'
 # replace "landingMode" with field name that carries 'safetyLanding' and 'criticalLanding'
+'''
+- /detectRed	std_msgs/Int16		- Amount of red pixels the drone camera is seeing
+- /detectBlue	std_msgs/Int16		- Amount of blue pixels the drone camera is seeing
+- /battery	std_msgs/Int16		- Battery percentage of the drone
+- /cmd_tello	std_msgs/String		- Used to send commands to the tello, for example"move_forward;180"
+'''
+
+
 
 pl = [
-'(once[100:101]({topic: "visual_sensor", detectRed: True}) -> {topic: "agentReact", reactRed: True} )',
+'(once[100:101]({topic: "detectRed", detectRed: True}) -> {topic: "agentReact", reactRed: True} )',
 '({topic: "batteryInfo", battery: "Safety"} -> {topic: "agLand", landingMode: "Safety"})',
 '({topic: "batteryInfo", battery: "Critical"} -> {topic: "agLand", landingMode: "Critical"})',
-'({topic: "drone1/cmd_vel", forwardMotion: True})'
+'({topic: "cmd_tello", forwardMotion: True})'
 ]
 
 # property to verify
@@ -28,7 +34,7 @@ def abstract_message(message):
 
     predicates['topic'] = message['topic']
 
-    if message['topic'] == "visual_sensor":
+    if message['topic'] == "detectRed":
     	detectRed = int(message['detectRed'])
     	predicates['detectRed'] = (detectRed > 200)
  
@@ -36,8 +42,8 @@ def abstract_message(message):
     	reaction = str(message['reaction'])
     	predicates['reactRed'] = (reaction == 'reactRed')
     	
-    elif message['topic'] == "batteryInfo":
-    	percentage = int(message['percentage'])
+    elif message['topic'] == "battery":
+    	percentage = int(message['battery'])
     	if percentage >= 20 and percentage <= 40: 
     		predicates['battery'] = 'Safety'
     	elif percentage < 20:
@@ -54,8 +60,8 @@ def abstract_message(message):
     	else:
     		predicates['landingMode'] = 'Unspecified'
 
-    elif message['topic'] == 'drone1/cmd_vel':
-    	linearY = float(message['linear']['y'])
+    elif message['topic'] == 'cmd_tello':
+    	linearY = float(message['cmd_vel']['linear']['y'])
     	predicates['forwardMotion'] = (linearY >= 0)
     	
     #print(predicates)
