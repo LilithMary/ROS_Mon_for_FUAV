@@ -1,10 +1,11 @@
 import oracle
 
 '''
-- /detectRed	std_msgs.msg.Int16		- Amount of red pixels the drone camera is seeing
-- /detectBlue	std_msgs.msg.Int16		- Amount of blue pixels the drone camera is seeing
-- /battery	std_msgs.msg.Int16		- Battery percentage of the drone
-- /drone1/cmd_vel	geometry_msgs/Twist
+/detectRed [std_msgs/msg/Int16]
+/agentReact [std_msgs/msg/String]
+/battery [std_msgs/msg/Int16]
+/agLand [std_msgs/msg/String]
+/cmd_vel [geometry_msgs/msg/Twist]
 '''
 
 
