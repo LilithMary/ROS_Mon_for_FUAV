@@ -12,6 +12,7 @@ from threading import *
 from rosmonitoring_interfaces.msg import *
 from std_msgs.msg import *
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from geometry_msgs.msg import Twist
 # done import
 
 class ROSMonitor_online_monitor_FUAV(Node):
@@ -118,7 +119,7 @@ class ROSMonitor_online_monitor_FUAV(Node):
 		self.topics_info['agentReact']={'package': 'std_msgs.msg', 'type': 'String'}
 		self.topics_info['battery']={'package': 'std_msgs.msg', 'type': 'Int16'}
 		self.topics_info['agLand']={'package': 'std_msgs.msg', 'type': 'String'}
-		self.topics_info['cmd_vel']={'package': 'std_msgs.msg', 'type': 'String'}
+		self.topics_info['cmd_vel']={'package': 'geometry_msgs.msg', 'type': 'Twist'}
 		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed',msg_type=Int16,callback=self.callbackdetectRed,qos_profile=1000)
 
 		self.config_subscribers['agentReact']=self.create_subscription(topic='agentReact',msg_type=String,callback=self.callbackagentReact,qos_profile=1000)
@@ -127,7 +128,7 @@ class ROSMonitor_online_monitor_FUAV(Node):
 
 		self.config_subscribers['agLand']=self.create_subscription(topic='agLand',msg_type=String,callback=self.callbackagLand,qos_profile=1000)
 
-		self.config_subscribers['cmd_vel']=self.create_subscription(topic='cmd_vel',msg_type=String,callback=self.callbackcmd_vel,qos_profile=1000)
+		self.config_subscribers['cmd_vel']=self.create_subscription(topic='cmd_vel',msg_type=Twist,callback=self.callbackcmd_vel,qos_profile=1000)
 
 		self.get_logger().info('Monitor' + self.name + ' started and ready' )
 		self.get_logger().info('Logging at' + self.logfn )

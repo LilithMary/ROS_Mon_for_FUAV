@@ -12,8 +12,8 @@ import oracle
 pl = [
 "(once[100:101]({topic: 'detectRed', detectRed: 'True'}) -> {topic: 'agentReact', data: 'reactRed'} )",
 "({topic: 'battery', battery: 'Safety'} -> {topic: 'agLand', data: 'safetyLanding'})",
-"({topic: 'battery', battery: 'Critical'} -> {topic: 'agLand', data: 'criticalLanding'})"#,
-#'({topic: "drone1/cmd_vel", forwardMotion: True})'
+"({topic: 'battery', battery: 'Critical'} -> {topic: 'agLand', data: 'criticalLanding'})",
+"(forall[t]. {topic: 'cmd_vel', time: *t} -> {topic: 'cmd_vel', forwardMotion: 'True', time: *t})"
 ]
 
 # property to verify
@@ -30,7 +30,7 @@ def abstract_message(message):
     predicates = dict()
 
     predicates['topic'] = message['topic']
-    predicates['time'] = float(message['time'])
+    predicates['time'] = str(message['time'])
     
     if message['topic'] == "detectRed":
     	detectRed = int(message['data'])
@@ -45,9 +45,9 @@ def abstract_message(message):
     	else:
     		predicates['battery'] = 'Unspecified'
     		
-    #elif message['topic'] == 'drone1/cmd_vel':
-    #	linearY = float(message['linear']['y'])
-    #	predicates['forwardMotion'] = (linearY >= 0)
+    elif message['topic'] == 'cmd_vel':
+    	linearY = float(message.linear.y)
+    	predicates['forwardMotion'] = str((linearY >= 0))
     	
     #print(predicates)
     return predicates
