@@ -95,3 +95,57 @@ source /install/setup.bash
 ros2 launch monitor online_monitor_launch.py
 ```
 
+### Online Monitoring with four monitors:
+#### Run Oracles in separate terminals on different ports
+```
+cd <your_ROSMonitoring_path>/oracle/TLOracle/
+python3 oracle.py --discrete --online --port 8080 --property tello_ros_mon_temporal_property_1
+```
+```
+cd <your_ROSMonitoring_path>/oracle/TLOracle/
+python3 oracle.py --discrete --online --port 8082 --property tello_ros_mon_temporal_property_2
+```
+```
+cd <your_ROSMonitoring_path>/oracle/TLOracle/
+python3 oracle.py --discrete --online --port 8083 --property tello_ros_mon_temporal_property_3
+```
+```
+cd <your_ROSMonitoring_path>/oracle/TLOracle/
+python3 oracle.py --discrete --online --port 8084 --property tello_ros_mon_temporal_property_4
+
+```
+
+#### Run ROS monitors in separate terminals
+```
+cd ~/<your_colcon_ws>
+source /opt/ros/foxy/setup.bash
+source /install/local_setup.bash
+source /install/setup.bash
+
+ros2 launch monitor online_monitor_launch_p1.py
+```
+```
+cd ~/<your_colcon_ws>
+source /opt/ros/foxy/setup.bash
+source /install/local_setup.bash
+source /install/setup.bash
+
+ros2 launch monitor online_monitor_launch_p2.py
+```
+```
+cd ~/<your_colcon_ws>
+source /opt/ros/foxy/setup.bash
+source /install/local_setup.bash
+source /install/setup.bash
+
+ros2 launch monitor online_monitor_launch_p3.py
+```
+```
+cd ~/<your_colcon_ws>
+source /opt/ros/foxy/setup.bash
+source /install/local_setup.bash
+source /install/setup.bash
+
+ros2 launch monitor online_monitor_launch_p4.py
+```
+
