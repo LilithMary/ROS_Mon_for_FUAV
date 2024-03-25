@@ -14,8 +14,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['offline_monitor_launch.py']),
-        ('share/' + package_name + '/launch', ['online_monitor_launch.py'])
+        ('share/' + package_name + '/launch', ['online_monitor_launch_p1.py', 'online_monitor_launch_p2.py', 'online_monitor_launch_p3.py', 'online_monitor_launch_p4.py'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,
