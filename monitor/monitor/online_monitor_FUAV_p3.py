@@ -18,36 +18,6 @@ from geometry_msgs.msg import Twist
 class ROSMonitor_online_monitor_FUAV_p3(Node):
 
 
-	def callbackdetectRed(self,data):
-		self.get_logger().info("monitor has observed "+ str(data))
-		dict= rosidl_runtime_py.message_to_ordereddict(data)
-		dict['topic']='detectRed'
-		dict['time']=float(self.get_clock().now().to_msg().sec)
-		self.ws_lock.acquire()
-		while dict['time'] in self.dict_msgs:
-			dict['time']+=0.01
-		self.ws.send(json.dumps(dict))
-		self.dict_msgs[dict['time']] = data
-		message=self.ws.recv()
-		self.ws_lock.release()
-		self.get_logger().info("event propagated to oracle")
-		self.on_message_topic(message)
-
-	def callbackagentReact(self,data):
-		self.get_logger().info("monitor has observed "+ str(data))
-		dict= rosidl_runtime_py.message_to_ordereddict(data)
-		dict['topic']='agentReact'
-		dict['time']=float(self.get_clock().now().to_msg().sec)
-		self.ws_lock.acquire()
-		while dict['time'] in self.dict_msgs:
-			dict['time']+=0.01
-		self.ws.send(json.dumps(dict))
-		self.dict_msgs[dict['time']] = data
-		message=self.ws.recv()
-		self.ws_lock.release()
-		self.get_logger().info("event propagated to oracle")
-		self.on_message_topic(message)
-
 	def callbackbattery(self,data):
 		self.get_logger().info("monitor has observed "+ str(data))
 		dict= rosidl_runtime_py.message_to_ordereddict(data)
@@ -78,21 +48,6 @@ class ROSMonitor_online_monitor_FUAV_p3(Node):
 		self.get_logger().info("event propagated to oracle")
 		self.on_message_topic(message)
 
-	def callbackcmd_tello(self,data):
-		self.get_logger().info("monitor has observed "+ str(data))
-		dict= rosidl_runtime_py.message_to_ordereddict(data)
-		dict['topic']='cmd_tello'
-		dict['time']=float(self.get_clock().now().to_msg().sec)
-		self.ws_lock.acquire()
-		while dict['time'] in self.dict_msgs:
-			dict['time']+=0.01
-		self.ws.send(json.dumps(dict))
-		self.dict_msgs[dict['time']] = data
-		message=self.ws.recv()
-		self.ws_lock.release()
-		self.get_logger().info("event propagated to oracle")
-		self.on_message_topic(message)
-
 	def __init__(self,monitor_name,log,actions):
 		self.monitor_publishers={}
 		self.config_publishers={}
@@ -108,27 +63,19 @@ class ROSMonitor_online_monitor_FUAV_p3(Node):
 		self.topics_info={}
 		super().__init__(self.name)
 		# creating the verdict and error publishers for the monitor
-		self.monitor_publishers['error']=self.create_publisher(topic=self.name+'/monitor_error',msg_type=MonitorError,qos_profile=1000)
+		self.monitor_publishers['error']=self.create_publisher(topic=self.name+'/monitor_3_error',msg_type=MonitorError,qos_profile=1000)
 
-		self.monitor_publishers['verdict']=self.create_publisher(topic=self.name+'/monitor_verdict',msg_type=String,qos_profile=1000)
+		self.monitor_publishers['verdict']=self.create_publisher(topic=self.name+'/monitor_3_verdict',msg_type=String,qos_profile=1000)
 
 		# done creating monitor publishers
 
 		self.publish_topics=False
-		self.topics_info['detectRed']={'package': 'std_msgs.msg', 'type': 'Int16'}
-		self.topics_info['agentReact']={'package': 'std_msgs.msg', 'type': 'String'}
 		self.topics_info['battery']={'package': 'std_msgs.msg', 'type': 'Int16'}
 		self.topics_info['agLand']={'package': 'std_msgs.msg', 'type': 'String'}
-		self.topics_info['cmd_tello']={'package': 'std_msgs.msg', 'type': 'String'}
-		self.config_subscribers['detectRed']=self.create_subscription(topic='detectRed',msg_type=Int16,callback=self.callbackdetectRed,qos_profile=1000)
-
-		self.config_subscribers['agentReact']=self.create_subscription(topic='agentReact',msg_type=String,callback=self.callbackagentReact,qos_profile=1000)
 
 		self.config_subscribers['battery']=self.create_subscription(topic='battery',msg_type=Int16,callback=self.callbackbattery,qos_profile=1000)
 
 		self.config_subscribers['agLand']=self.create_subscription(topic='agLand',msg_type=String,callback=self.callbackagLand,qos_profile=1000)
-
-		self.config_subscribers['cmd_tello']=self.create_subscription(topic='cmd_tello',msg_type=String,callback=self.callbackcmd_tello,qos_profile=1000)
 
 		self.get_logger().info('Monitor' + self.name + ' started and ready' )
 		self.get_logger().info('Logging at' + self.logfn )
@@ -188,11 +135,8 @@ def main(args=None):
 	rclpy.init(args=args)
 	log = './log_FUAV_online_p3.txt'
 	actions = {}
-	actions['detectRed']=('log',0)
-	actions['agentReact']=('log',0)
 	actions['battery']=('log',0)
 	actions['agLand']=('log',0)
-	actions['cmd_tello']=('log',0)
 	monitor = ROSMonitor_online_monitor_FUAV_p3('online_monitor_FUAV_p3',log,actions)
 	rclpy.spin(monitor)
 	monitor.ws.close()
