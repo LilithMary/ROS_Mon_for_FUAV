@@ -34,7 +34,7 @@ batteryPredicate is 'Critical' if and only if battery < 20.
 ({topic: 'battery', batteryPredicate: 'Critical'} -> {topic: 'agLand', data: 'criticalLanding'})
 ```
 
-4. The drone should never more backwards, i.e. its velocity in the y axis should be always non-negative.
+4. The drone should never move backwards, i.e. its velocity in the y axis should be always non-negative.
 ```
 (forall[t]. {topic: 'cmd_vel', time: *t} -> {topic: 'cmd_vel', forwardMotion: 'True', time: *t})
 ```
