@@ -30,7 +30,7 @@ batteryPredicate is 'Safety' if and only if battery >= 20 and battery <= 40.
 
 3. If the remaining battery percentage is strictly less than 20, then the drone should publish a message 'criticalLanding' on topic 'agLand'.
 ```
-batteryPredicate is 'Critical' if and only if batter < 20.
+batteryPredicate is 'Critical' if and only if battery < 20.
 ({topic: 'battery', batteryPredicate: 'Critical'} -> {topic: 'agLand', data: 'criticalLanding'})
 ```
 
