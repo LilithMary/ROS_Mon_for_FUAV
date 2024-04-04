@@ -1,0 +1,2 @@
+{"data": 50, "topic": "battery", "time": 1710175287.0}
+{"topic": "agLand", "data": "safetyLanding", "time": 1710175288.0}
