@@ -11,9 +11,9 @@ import oracle
 
 
 pl = [
-"(once[100:101]({topic: 'detectRed', detectRed: 'True'}) -> {topic: 'agentReact', data: 'reactRed'} )",
-"({topic: 'battery', battery: 'Safety'} -> {topic: 'agLand', data: 'safetyLanding'})",
-"({topic: 'battery', battery: 'Critical'} -> {topic: 'agLand', data: 'criticalLanding'})",
+"({topic: 'agentReact', data: 'reactRed'} -> once[100:101]{topic: 'detectRed', detectRed: 'True'})",
+"({topic: 'agLand', data: 'safetyLanding'} -> once{topic: 'battery', battery: 'Safety'})",
+"({topic: 'agLand', data: 'criticalLanding'} -> once{topic: 'battery', battery: 'Critical'})",
 "(forall[t]. {topic: 'cmd_vel', time: *t} -> {topic: 'cmd_vel', forwardMotion: 'True', time: *t})"
 ]
 
@@ -32,6 +32,9 @@ def abstract_message(message):
 
     predicates['topic'] = message['topic']
     predicates['time'] = str(message['time'])
+    
+    if message['topic'] in ["agentReact", "agLand", "detectRed", "battery"]:
+        predicates['data'] = str(message['data'])
     
     if message['topic'] == "detectRed":
     	detectRed = int(message['data'])
