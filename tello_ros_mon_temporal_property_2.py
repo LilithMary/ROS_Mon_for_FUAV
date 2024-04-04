@@ -1,7 +1,7 @@
 import oracle
 
 # property to verify
-PROPERTY =  "({topic: 'agLand', data: 'safetyLanding'} -> once{topic: 'battery', battery: 'Safety'})"
+PROPERTY =  "({topic: 'agLand', data: 'safetyLanding'} -> once[100:101]{topic: 'battery', battery: 'Safety'})"
 
 # predicates used in the property (initialization for time 0)
 predicates = dict()
