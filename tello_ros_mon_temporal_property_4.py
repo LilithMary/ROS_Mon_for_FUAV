@@ -1,21 +1,5 @@
 import oracle
 
-'''
-- /detectRed	std_msgs.msg.Int16		- Amount of red pixels the drone camera is seeing
-- /detectBlue	std_msgs.msg.Int16		- Amount of blue pixels the drone camera is seeing
-- /battery	std_msgs.msg.Int16		- Battery percentage of the drone
-- /drone1/cmd_vel	geometry_msgs/Twist
-'''
-
-
-
-#pl = [
-#"(once[100:101]({topic: 'detectRed', detectRed: 'True'}) -> {topic: 'agentReact', data: 'reactRed'} )",
-#"({topic: 'battery', battery: 'Safety'} -> {topic: 'agLand', data: 'safetyLanding'})",
-#"({topic: 'battery', battery: 'Critical'} -> {topic: 'agLand', data: 'criticalLanding'})",
-#"(forall[t]. {topic: 'cmd_vel', time: *t} -> {topic: 'cmd_vel', forwardMotion: 'True', time: *t})"
-#]
-
 # property to verify
 PROPERTY = "(forall[t]. {topic: 'cmd_vel', time: *t} -> {topic: 'cmd_vel', forwardMotion: 'True', time: *t})"
 
@@ -32,19 +16,6 @@ def abstract_message(message):
     predicates['topic'] = message['topic']
     predicates['time'] = str(message['time'])
     
-    #if message['topic'] == "detectRed":
-    #	detectRed = int(message['data'])
-    #	predicates['detectRed'] = str((detectRed > 200))
-    	
-    #elif message['topic'] == "battery":
-    #	percentage = int(message['data'])
-    #	if percentage >= 20 and percentage <= 40: 
-    #		predicates['battery'] = 'Safety'
-    #	elif percentage < 20:
-    #		predicates['battery'] = 'Critical'
-    #	else:
-    #		predicates['battery'] = 'Unspecified'
-    		
     if message['topic'] == 'cmd_vel':
     	linearY = float(message.linear.y)
     	predicates['forwardMotion'] = str((linearY >= 0))
