@@ -15,26 +15,26 @@ We are interested in observing the below topics:
 ```
 ## Properties
 
-1. If the drone detects a red light within 100 and 101 time steps ago, then it should publish a message 'reactRed' on topic 'agentReact'.
+1. If the drone publishes a message 'reactRed' on topic 'agentReact', it must have detected a red light within 100 and 101 time steps ago.
     
 ```
 detectRedPredicate is 'True' if and only if detectRed > 200.
-(once[100:101]({topic: 'detectRed', detectRedPredicate: 'True'}) -> {topic: 'agentReact', data: 'reactRed'} )
+({topic: 'agentReact', data: 'reactRed'} -> once[100:101]{topic: 'detectRed', detectRed: 'True'})
 ```
 
-2. If the remaining battery percentage is between 20 and 40 inclusive, then the drone should publish a message 'safetyLanding' on topic 'agLand'.
+2. If the drone publishes a message 'safetyLanding' on topic 'agLand', then the remaining battery percentage must have been between 20 and 40 inclusive within 100 and 101 time steps ago.
 ```
 batteryPredicate is 'Safety' if and only if battery >= 20 and battery <= 40.
-({topic: 'battery', batteryPredicate: 'Safety'} -> {topic: 'agLand', data: 'safetyLanding'})
+({topic: 'agLand', data: 'safetyLanding'} -> once[100:101]{topic: 'battery', battery: 'Safety'})
 ```
 
-3. If the remaining battery percentage is strictly less than 20, then the drone should publish a message 'criticalLanding' on topic 'agLand'.
+3. If the drone publishes a message 'criticalLanding' on topic 'agLand', then the remaining battery percentage must have been strictly less than 20 within 100 and 101 time steps ago.
 ```
 batteryPredicate is 'Critical' if and only if battery < 20.
-({topic: 'battery', batteryPredicate: 'Critical'} -> {topic: 'agLand', data: 'criticalLanding'})
+({topic: 'agLand', data: 'criticalLanding'} -> once[100:101]{topic: 'battery', battery: 'Critical'})
 ```
 
-4. The drone should never move backwards, i.e. its velocity in the y axis should be always non-negative.
+4. The drone should never move backwards, i.e. its velocity in the y axis should be always non-negative. If the drone publishes a message on topic ```cmd_vel```, then its ```forwardMotion``` must be 'True'.
 ```
 (forall[t]. {topic: 'cmd_vel', time: *t} -> {topic: 'cmd_vel', forwardMotion: 'True', time: *t})
 ```
