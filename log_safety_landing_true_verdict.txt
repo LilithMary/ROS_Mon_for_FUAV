@@ -1,0 +1,7 @@
+{"data": 43, "topic": "battery", "time": 1712528910.0, "verdict": "currently_true"}
+{"data": 42, "topic": "battery", "time": 1712528920.0, "verdict": "currently_true"}
+{"data": 41, "topic": "battery", "time": 1712528940.0, "verdict": "currently_true"}
+{"data": 40, "topic": "battery", "time": 1712528950.0, "verdict": "currently_true"}
+{"data": 39, "topic": "battery", "time": 1712528951.0, "verdict": "currently_true"}
+{"data": 38, "topic": "battery", "time": 1712528951.0, "verdict": "currently_true"}
+{"data": "safetyLanding", "topic": "agLand", "time": 1712528953.0, "verdict": "currently_true"}
