@@ -1,7 +1,7 @@
 import oracle
 
 # property to verify
-PROPERTY =  "({topic: 'agLand', data: 'safetyLanding'} -> once[2:5]{topic: 'battery', battery: 'Safety'}) and (not {topic: 'agLand', data: 'safetyLanding'} -> not (once[3:5] {topic: 'battery', battery: 'Safety'}))"
+PROPERTY =  "({topic: 'agLand', data_mod: 'safetyLanding'} -> once[2:5]{topic: 'battery', battery: 'Safety'}) and (not {topic: 'agLand', data_mod: 'safetyLanding'} -> not (once[3:5] {topic: 'battery', battery: 'Safety'}))"
 
 # predicates used in the property (initialization for time 0)
 predicates = dict()
@@ -18,6 +18,8 @@ def abstract_message(message):
     
     if message['topic'] in ["agLand", "battery"]:
         predicates['data'] = str(message['data'])
+    if message['topic'] == "agLand":
+        predicates['data_mod'] = str(message['data'].replace('"',''))
 
     if message['topic'] == "battery":
     	percentage = int(message['data'])

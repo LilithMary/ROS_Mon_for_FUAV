@@ -1,7 +1,7 @@
 import oracle
 
 # property to verify
-PROPERTY = "({topic: 'agentReact', data: 'reactRed'} -> once[100:101]{topic: 'detectRed', detectRed: 'True'})"
+PROPERTY = '''({topic: 'agentReact', data_mod: 'reactRed'} -> once[:1]{topic: 'detectRed', detectRed: 'True'}) and (not {topic: 'agentReact', data_mod: 'reactRed'} -> not (once[100:101]{topic: 'detectRed', detectRed: 'True'}))'''
 
 # predicates used in the property (initialization for time 0)
 predicates = dict()
@@ -15,12 +15,19 @@ def abstract_message(message):
 
     predicates['topic'] = message['topic']
     predicates['time'] = str(message['time'])
+    #print(message['time'])
+    #print(predicates['time'])
 
     if message['topic'] in ["agentReact", "detectRed"]:
         predicates['data'] = str(message['data'])
+    if message['topic'] == "agentReact":
+        predicates['data_mod'] = str(message['data'].replace('"', ''))
+
         
     if message['topic'] == "detectRed":
     	detectRed = int(message['data'])
     	predicates['detectRed'] = str((detectRed > 200))
+    	#print('detect:', message)
+    	#print(predicates['detectRed'])
     	
     return predicates
