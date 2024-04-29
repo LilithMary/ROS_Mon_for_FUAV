@@ -1,0 +1,3 @@
+{"data": 41, "topic": "battery", "time": 46.0}			
+{"data": 15, "topic": "battery", "time": 53.0}			
+{"data": "criticalLanding", "topic": "agLand", "time": 53.0}

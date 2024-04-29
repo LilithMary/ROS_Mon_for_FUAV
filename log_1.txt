@@ -1,0 +1,4 @@
+{"data": 632, "topic": "detectRed", "time": 32.0}		
+{"data": 669, "topic": "detectRed", "time": 32.0}		
+{"data": "reactRed", "topic": "agentReact", "time": 32.0}		
+{"data": 0, "topic": "detectRed", "time": 32.0}

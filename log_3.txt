@@ -1,0 +1,5 @@
+{"data": 50, "topic": "battery", "time": 57.0}		
+{"data": 40, "topic": "battery", "time": 62.0}		
+{"data": 40, "topic": "battery", "time": 63.0}		
+{"data": 40, "topic": "battery", "time": 64.0}		
+{"data": 40, "topic": "battery", "time": 65.0}

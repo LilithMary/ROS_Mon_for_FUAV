@@ -1,0 +1,4 @@
+{"data": 99, "topic": "battery", "time": 62.0}			
+{"data": 99, "topic": "battery", "time": 63.0}			
+{"data": 99, "topic": "battery", "time": 64.0}			
+{"data": "safetyLanding", "topic": "agLand", "time": 65.0}
